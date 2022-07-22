@@ -1,16 +1,15 @@
 import os
 import random
 from console import fx, fg
-import flask
-
 from models.time_created import TimeCreatedModel
 
-def log(msg: str, is_error=False, is_success=False):
+
+def log(msg: str, is_error=False, is_success=False, is_force=False):
     """ Logs verbose information about runtime. """
-    if bool(os.environ.get("VERBOSE", False)) == True:
+    if bool(os.environ.get("SHOW_LOGS", False)) == True or is_force:
         msg = fx.bold(str(msg))
-        print(f'{TimeCreatedModel().formatted_date} {fx.dim(" |")} [{fg.red(msg) if is_error else (fg.white(msg) if not is_success else fg.green(msg))}]')
-log("Verbose mode: " + os.environ.get("VERBOSE", "False"), "True")
+        print(f'{fx.dim(TimeCreatedModel().formatted_date + " |")} [{fg.red(msg) if is_error else (fg.white(msg) if not is_success else fg.green(msg))}]')
+log(f"""Verbose mode: {os.environ.get('SHOW_LOGS', 'False')}. To be able to use the log utility, requires you to set the 'SHOW_LOGS' env variable to 'True'.""", is_force=True)
 
 
 def query_to_dict(query_string: str) -> dict:
@@ -46,13 +45,13 @@ def random_sort(_list: list) -> list:
     return random_list
     
 
-def read_request_body() -> dict:
+def read_request_body(request) -> dict:
     """Reads the binary data sent in the request."""
-    request_data = flask.request.get_data()
+    request_data = request.get_data()
 
     """Proof check if the data is readable as normal text or not."""
     if request_data != b'' or request_data.isascii():
-        request_body = flask.request.get_json()
+        request_body = request.get_json()
         if request_body != None:
             return request_body
         else:
