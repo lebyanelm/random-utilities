@@ -1,15 +1,23 @@
 import os
 import random
-from console import fx, fg
-from models.time_created import TimeCreatedModel
+import pymongo
+import console
+import models.time_created
+import traceback
+import sys
 
 
 def log(msg: str, is_error=False, is_success=False, is_force=False):
     """ Logs verbose information about runtime. """
     if bool(os.environ.get("SHOW_LOGS", False)) == True or is_force:
-        msg = fx.bold(str(msg))
-        time = f"{TimeCreatedModel().formatted_date} {TimeCreatedModel().time}"
-        print(f'{fx.dim(time + " |")} [{fg.red(msg) if is_error else (fg.white(msg) if not is_success else fg.green(msg))}]')
+        msg = console.fx.bold(str(msg))
+
+        """Get the current timestamp"""
+        _time = models.time_created.TimeCreatedModel()
+        time = f"{_time.formatted_date} {_time.time}"
+
+        """Show the message"""
+        print(f'{console.fx.dim(time + " |")} [{console.fg.red(msg) if is_error else (console.fg.white(msg) if not is_success else console.fg.green(msg))}]')
 log(f"""Verbose mode: {os.environ.get('SHOW_LOGS', 'False')}. To be able to use the log utility, requires you to set the 'SHOW_LOGS' env variable to 'True' / '1'.""", is_force=True)
 
 
