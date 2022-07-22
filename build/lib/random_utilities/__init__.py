@@ -3,11 +3,13 @@ import random
 from console import fx, fg
 import flask
 
+from models.time_created import TimeCreatedModel
+
 def log(msg: str, is_error=False, is_success=False):
     """ Logs verbose information about runtime. """
     if bool(os.environ.get("VERBOSE", False)) == True:
         msg = fx.bold(str(msg))
-        print(f'{fx.dim("* |")} [{fg.red(msg) if is_error else (fg.white(msg) if not is_success else fg.green(msg))}]')
+        print(f'{TimeCreatedModel().formatted_date} {fx.dim(" |")} [{fg.red(msg) if is_error else (fg.white(msg) if not is_success else fg.green(msg))}]')
 log("Verbose mode: " + os.environ.get("VERBOSE", "False"), "True")
 
 
