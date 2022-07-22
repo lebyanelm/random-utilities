@@ -71,10 +71,35 @@ def read_request_body(request) -> dict:
         return dict()
 
 
-# Checks if a dictionary contains all fields in a provided array, returns missing fields if any
+"""Checks if a dictionary contains all fields in a provided array, returns missing fields if any"""
 def fields_all_check(dct: dict, lst: list) -> tuple:
     for field in dct:
         if field in lst:
             lst.remove(field)
     is_all_check = True if len(lst) == 0 else False
     return is_all_check, lst
+
+
+"""Database connection capabilities."""
+default_database = None # global access variable to save the db connections
+default_collection = None # to assign it to a collection connection
+def initiate_mongodb_connection(mongo_host, database_name, collection_name):
+    if mongo_host and collection_name and database_name:
+        try:
+            log("Connecting to database and testing connection...")
+            mongo_client = pymongo.MongoClient(mongo_host,
+                server_api=pymongo.server_api.ServerApi("1"))
+
+            default_database = mongo_client[database_name]
+            default_collection  = default_database[collection_name]
+            document_count = default_collection.count_documents({ })
+
+            log(f"Database successfully connected with `{document_count}` documents in collection `media_resources`.")
+
+            return default_collection, True
+        except:
+            log("Opps something went wrong. " + traceback.format_exc())
+            sys.exit(1)
+    else:
+        log("No database connection specified. Not connecting to any.")
+        return None, False
