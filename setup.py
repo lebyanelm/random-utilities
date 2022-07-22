@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 setup(
-    name="random_utilites",
+    name="random_utilities",
     version="1.0.3",
     author="Hetchfund.Capital (Libby Lebyane)",
     author_email="<lebyane.lm@gmail.com>",
