@@ -1,10 +1,12 @@
+import datetime
 import os
 import random
 import pymongo
 import console
-import models.time_created
+from .models.time_created import TimeCreatedModel
 import traceback
 import sys
+import jwt
 
 
 def log(msg: str, is_error=False, is_success=False, is_force=False):
@@ -13,7 +15,7 @@ def log(msg: str, is_error=False, is_success=False, is_force=False):
         msg = console.fx.bold(str(msg))
 
         """Get the current timestamp"""
-        _time = models.time_created.TimeCreatedModel()
+        _time = TimeCreatedModel()
         time = f"{_time.formatted_date} {_time.time}"
 
         """Show the message"""
@@ -84,6 +86,8 @@ def fields_all_check(dct: dict, lst: list) -> tuple:
 default_database = None # global access variable to save the db connections
 default_collection = None # to assign it to a collection connection
 def initiate_mongodb_connection(mongo_host, database_name, collection_name):
+    global default_collection
+    global default_database
     if mongo_host and collection_name and database_name:
         try:
             log("Connecting to database and testing connection...")
@@ -94,7 +98,7 @@ def initiate_mongodb_connection(mongo_host, database_name, collection_name):
             default_collection  = default_database[collection_name]
             document_count = default_collection.count_documents({ })
 
-            log(f"Database successfully connected with `{document_count}` documents in collection `media_resources`.")
+            log(f"Database successfully connected with `{document_count}` documents in collection `{collection_name}`.")
 
             return default_collection, True
         except:
@@ -103,3 +107,28 @@ def initiate_mongodb_connection(mongo_host, database_name, collection_name):
     else:
         log("No database connection specified. Not connecting to any.")
         return None, False
+
+
+def authentication_jwt_token(payload, is_persist = False):
+    time_now = datetime.datetime.utcnow()
+    time_expiry = datetime.timedelta(days=7 if not is_persist else 365)
+	
+    return jwt.encode(
+        {
+            "id": payload,
+            "exp": time_now + time_expiry
+        },
+
+        os.environ["SECRET"],
+        algorithm="HS256"
+    )
+	
+
+def verify_jwt_token(jwt_secret):
+    try:
+        jwt.decode(jwt_secret, os.environ["SECRET"],
+            options={"verify_exp": True},
+            algorithms=["HS256"])
+        return True
+    except:
+        return False

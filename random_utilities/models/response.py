@@ -1,7 +1,7 @@
 import json
 import socket
 from flask import make_response
-from hetch_utilities.models.http_codes import http_codes
+from random_utilities.models.http_codes import http_codes
 
 class ResponseModel():
     def __init__(self, cd: int, rs=None, d=None, msg=None):
